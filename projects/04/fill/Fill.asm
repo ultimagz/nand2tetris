@@ -11,4 +11,62 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+// Initial
+    @8191               // (256 row * 32 col) - 1 
+    D=A                 // each col have 16 bits
+    @total
+    M=D                 // Total screen pixel size
+
+(EVENT)
+    @SCREEN
+    D=A
+    @addr
+    M=D                 // Screen base
+
+    @R0
+    D=A
+    @index
+    M=D                 // index = 0
+
+    @KBD
+    D=M
+
+    @FILL_WHITE
+    D;JEQ
+
+    @FILL_BLACK
+    0;JMP
+
+(FILL_WHITE)
+    @color
+    M=0
+    @FILL_SCREEN
+    0;JMP
+
+(FILL_BLACK)
+    @color
+    M=-1
+
+(FILL_SCREEN)
+    @index
+    D=M
+    @total
+    D=D-M
+    @EVENT
+    D;JGT
+
+    @color
+    D=M
+
+    @addr
+    A=M
+    M=D
+
+    @index
+    M=M+1
+
+    @addr
+    M=M+1
+    
+    @FILL_SCREEN
+    0;JMP
