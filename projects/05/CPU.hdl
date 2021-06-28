@@ -25,6 +25,15 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+ // instruction
+ // ixxaccccccdddjjj
+ // 15          i == 0 -> A instruction else C instruction
+ // 14..13     xx      -> ??
+ // 12          a      -> Input selection
+ // 11..6  cccccc      -> ALU flags zx, nx, zy, ny, f, no
+ // 5..3      ddd      -> Destination bits for Register-A, Register-D, writeM
+ // 2..0      jjj      -> Jump flag
+
 CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
@@ -39,5 +48,53 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // Instruction Type
+    Not(in=instruction[15], out=isA);
+    Mux16(a=outputALU, b=instruction, sel=isA, out=inA);
+
+    // if instruction-A load instruction load to Register-A 
+    // if instruction-C load instruction and [5] == 1 load ALU output to Register-A 
+    Or(a=isA, b=instruction[5], out=loadA);
+    ARegister(in=inA, load=loadA, out=outA, out[0..14]=addressM);
+
+    // Select input between output from Register-A and inM
+    And(a=instruction[15], b=instruction[12], out=selAorM);
+    Mux16(a=outA, b=inM, sel=selAorM, out=inputAM);
+
+    // Load output from ALU to Register-D
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(in=outputALU, load=loadD, out=outputD);
+
+    // Calulate input from selection of [instruction, inM] and Register-D
+    ALU(x=outputD,
+        y=inputAM,
+        zx=instruction[11],
+        nx=instruction[10],
+        zy=instruction[9],
+        ny=instruction[8],
+        f=instruction[7],
+        no=instruction[6],
+        out=outputALU, out=outM,
+        zr=zrALU,
+        ng=ngALU);
+
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+   // Jump if positive
+    Or(a=zrALU, b=ngALU, out=zrOrNg);
+    Not(in=zrOrNg, out=positive);
+    And(a=positive, b=instruction[0], out=jgt);
+
+    // Jump if zero
+    And(a=zrALU, b=instruction[1], out=jeq);
+
+    // Jump if negative
+    And(a=ngALU, b=instruction[2], out=jlt);
+
+    // Should jump only instruction-C
+    Or(a=jeq, b=jlt, out=jle);
+    Or(a=jle, b=jgt, out=jump);
+    And(a=instruction[15], b=jump, out=loadPC);
+
+    PC(in=outA, inc=true, load=loadPC, reset=reset, out[0..14]=pc);
 }
