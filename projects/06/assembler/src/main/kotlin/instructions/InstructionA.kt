@@ -1,7 +1,5 @@
 package instructions
 
-import com.github.ajalt.clikt.output.TermUi
-
 class InstructionA(private val code: String): HackInstruction {
     override fun translate(): String {
         return InstructionPattern.A.matchEntire(code)
