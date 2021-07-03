@@ -26,5 +26,4 @@ class InstructionA(private val code: String): HackInstruction {
             Integer.toBinaryString(x)
         ).replace(" ".toRegex(), "0")
     }
-
 }
