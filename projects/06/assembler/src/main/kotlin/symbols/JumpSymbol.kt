@@ -2,7 +2,7 @@ package symbols
 
 class JumpSymbol private constructor() {
     companion object {
-        const val none: String = "000000"
+        const val none: String = "000"
 
         fun getValue(symbol: String): String {
             return when(symbol) {
