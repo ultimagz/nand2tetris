@@ -9,7 +9,7 @@ class InstructionA(private val code: String): HackInstruction {
             ?.lastOrNull()
             ?.let { symbol ->
                 getSymbolValue(symbol)
-            } ?: throw Exception("Cannot translate ($code) to Instruction A format.")
+            } ?: throw Exception("Fail to translate ($code) to Instruction A.")
     }
 
     private fun getSymbolValue(symbol: String): String {
