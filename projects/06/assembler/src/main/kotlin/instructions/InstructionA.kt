@@ -1,6 +1,12 @@
 package instructions
 
-class InstructionA(private val code: String): HackInstruction {
+import symbols.BuildInSymbols
+
+class InstructionA(
+    private val code: String,
+    private val labelSymbols: HashMap<String, Int> = hashMapOf(),
+    private val variableSymbols: HashMap<String, Int> = hashMapOf()
+): HackInstruction {
     override fun translate(): String {
         return InstructionPattern.A.matchEntire(code)
             ?.groupValues
@@ -11,14 +17,18 @@ class InstructionA(private val code: String): HackInstruction {
     }
 
     private fun getSymbolValue(symbol: String): String {
-        return symbol.toIntOrNull()?.let { toBinary(it) } ?: getValueFromSymbolTable(symbol)
+        return symbol.toIntOrNull()?.let { toBinaryString(it) } ?: getValueFromSymbol(symbol)
     }
 
-    private fun getValueFromSymbolTable(symbol: String): String {
-        return "0000 0000 0000 0000"
+    private fun getValueFromSymbol(symbol: String): String {
+        val value = variableSymbols[symbol]
+            ?: labelSymbols[symbol]
+            ?: BuildInSymbols.getValue(symbol)
+            ?: throw Exception(" Cannot find symbol ($symbol)")
+        return toBinaryString(value)
     }
 
-    fun toBinary(x: Int, len: Int = 16): String {
+    fun toBinaryString(x: Int, len: Int = 16): String {
         return String.format(
             "%${len}s",
             Integer.toBinaryString(x)
