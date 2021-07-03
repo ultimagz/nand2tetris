@@ -13,6 +13,7 @@ class Assembler: CliktCommand(help = "Translate FILE Hack assembly to binary.") 
         File(file).readLines()
             .map { CleanUp(it).removeComments() }
             .filter { it.isNotEmpty() }
+            .map { echo(it); it }
             .map { HackInstruction.matchWith(it).translate() }
             .forEach { echo(it) }
     }
