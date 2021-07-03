@@ -10,7 +10,7 @@ class Assembler: CliktCommand(help = "Translate FILE Hack assembly to binary.") 
 
     override fun run() {
         File(file).readLines()
-            .map { removeComments(it) }
+            .map { CleanUp(it).removeComments() }
             .forEach { echo(it) }
     }
 
