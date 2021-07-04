@@ -4,9 +4,9 @@ import instructions.HackInstruction
 import symbols.define.LabelSymbols
 import java.io.File
 
-fun main(args: Array<String>) = Assembler().main(args)
+fun main(args: Array<String>) = HackAssembler().main(args)
 
-class Assembler: CliktCommand(help = "Translate FILE Hack assembly to binary.") {
+class HackAssembler: CliktCommand(help = "Translate FILE Hack assembly to binary.") {
 
     private val file by argument()
     private val customOutPath: String? = null
