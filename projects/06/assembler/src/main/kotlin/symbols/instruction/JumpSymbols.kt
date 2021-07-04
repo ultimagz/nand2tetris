@@ -6,10 +6,10 @@ class JumpSymbols private constructor() {
 
         private val INSTANCE = JumpSymbols()
 
-        fun lookUp(symbol: String): String = INSTANCE.lookUp(symbol)
+        fun lookUp(symbol: String?): String = INSTANCE.lookUp(symbol)
     }
 
-    fun lookUp(symbol: String): String {
+    fun lookUp(symbol: String?): String {
         return when(symbol) {
             "JGT" -> "001"
             "JEQ" -> "010"

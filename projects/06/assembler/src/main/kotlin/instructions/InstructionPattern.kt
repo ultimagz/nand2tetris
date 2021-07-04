@@ -6,6 +6,7 @@ enum class InstructionPattern(internal val pattern: String) {
     C_JUMP("(JGT|JEQ|JGE|JLT|JNE|JLE|JMP)"),
     C_DEST_COMP("^(?>${C_DEST.pattern}=)${C_COMP.pattern}$"),
     C_COMP_JUMP("^${C_COMP.pattern}(?>;${C_JUMP.pattern})$"),
+    C_FULL("^(?>${C_DEST.pattern}=)${C_COMP.pattern}(?>;${C_JUMP.pattern})$"),
     C("^(?>${C_DEST.pattern}=)?${C_COMP.pattern}?(?>;${C_JUMP.pattern})?$"),
     A("^@(.*)$");
 

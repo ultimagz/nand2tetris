@@ -5,45 +5,72 @@ import symbols.instruction.CompSymbols
 import symbols.instruction.DestSymbols
 import symbols.instruction.JumpSymbols
 
+// D = M+1; JGT -> 111 1110111 010 001
+
+private data class CPart(
+    val dest: String? = null,
+    val comp: String? = null,
+    val jump: String? = null,
+)
+
 class InstructionC(private val code: String): HackInstruction {
     override fun translate(): String {
         return when {
-            InstructionPattern.C_DEST_COMP.matches(code) -> translate(InstructionPattern.C_DEST_COMP, ::buildDestComp)
-            InstructionPattern.C_COMP_JUMP.matches(code) -> translate(InstructionPattern.C_COMP_JUMP, ::buildCompJump)
+            InstructionPattern.C_DEST_COMP.matches(code) ->
+                translate(code, InstructionPattern.C_DEST_COMP, ::mappingDestComp)
+            InstructionPattern.C_COMP_JUMP.matches(code) ->
+                translate(code, InstructionPattern.C_COMP_JUMP, ::mappingCompJump)
+            InstructionPattern.C_FULL.matches(code) ->
+                translate(code, InstructionPattern.C_FULL, ::mappingFull)
             else -> throw Exception("Cannot translate ($code) to Instruction A format.")
         }
     }
 
-    private fun translate(pattern: InstructionPattern, transform: (Pair<String, String>) -> String): String {
+    private fun translate(
+        code: String,
+        pattern: InstructionPattern,
+        mapping: (List<String>) -> CPart
+    ): String {
+        return getInstructionParts(pattern, code)
+            ?.let { mapping(it) }
+            ?.run { buildMachineCode(this) }
+            ?: throw Exception("Fail to translate ($code) to $pattern")
+    }
+
+    private fun mappingFull(data: List<String>): CPart {
+        assert(data.size == 3)
+        return CPart(
+            dest = data.getOrNull(0),
+            comp = data.getOrNull(1),
+            jump = data.getOrNull(2)
+        )
+    }
+
+    private fun mappingDestComp(data: List<String>): CPart {
+        assert(data.size == 2)
+        return CPart(dest = data.first(), comp = data.last())
+    }
+
+    private fun mappingCompJump(data: List<String>): CPart {
+        assert(data.size == 2)
+        return CPart(comp = data.first(), jump = data.last())
+    }
+
+    private fun getInstructionParts(pattern: InstructionPattern, code: String): List<String>? {
         return pattern.matchEntire(code)
             ?.groupValues
             ?.toMutableList()
             ?.let {
                 it.removeFirst()
-                assert(it.size == 2)
-                Pair(it.first(), it.last())
+                it
             }
-            ?.let(transform)
-            ?: throw Exception("Cannot translate ($code) to $pattern.")
     }
 
-    private fun buildDestComp(symbols: Pair<String, String>): String {
-        val destSymbol = symbols.first
-        val compSymbol = symbols.second
-        return buildMachineCode(destSymbol = destSymbol, compSymbol = compSymbol)
-    }
-
-    private fun buildCompJump(symbols: Pair<String, String>): String {
-        val compSymbol = symbols.first
-        val jumpSymbol = symbols.second
-        return buildMachineCode(compSymbol = compSymbol, jumpSymbol = jumpSymbol)
-    }
-
-    private fun buildMachineCode(destSymbol: String? = null, compSymbol: String, jumpSymbol: String? = null): String {
-        val dest = if (destSymbol == null) DestSymbols.NONE else DestSymbols.lookUp(destSymbol)
-        val a = ABit.lookUp(compSymbol)
-        val comp = CompSymbols.lookUp(compSymbol)
-        val jump = if (jumpSymbol == null) JumpSymbols.NONE else JumpSymbols.lookUp(jumpSymbol)
+    private fun buildMachineCode(cPart: CPart): String {
+        val dest = DestSymbols.lookUp(cPart.dest)
+        val a = ABit.lookUp(cPart.comp)
+        val comp = CompSymbols.lookUp(cPart.comp)
+        val jump = JumpSymbols.lookUp(cPart.jump)
 
         return "111$a$comp$dest$jump"
     }

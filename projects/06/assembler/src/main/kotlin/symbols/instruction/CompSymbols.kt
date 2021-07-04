@@ -6,10 +6,10 @@ class CompSymbols private constructor() {
 
         private val INSTANCE = CompSymbols()
 
-        fun lookUp(symbol: String): String = INSTANCE.lookUp(symbol)
+        fun lookUp(symbol: String?): String = INSTANCE.lookUp(symbol)
     }
 
-    fun lookUp(symbol: String): String {
+    fun lookUp(symbol: String?): String {
         return when(symbol) {
             "0"          -> "101010"
             "1"          -> "111111"

@@ -6,10 +6,10 @@ class DestSymbols private constructor() {
 
         private val INSTANCE = DestSymbols()
 
-        fun lookUp(symbol: String): String = INSTANCE.lookUp(symbol)
+        fun lookUp(symbol: String?): String = INSTANCE.lookUp(symbol)
     }
 
-    fun lookUp(symbol: String): String {
+    fun lookUp(symbol: String?): String {
         return when(symbol) {
             "M"   -> "001"
             "D"   -> "010"
