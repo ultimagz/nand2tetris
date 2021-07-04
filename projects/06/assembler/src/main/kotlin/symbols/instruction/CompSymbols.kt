@@ -2,7 +2,7 @@ package symbols.instruction
 
 class CompSymbols private constructor() {
     companion object {
-        const val none: String = "000000"
+        const val NONE: String = "000000"
 
         private val INSTANCE = CompSymbols()
 
@@ -29,7 +29,7 @@ class CompSymbols private constructor() {
             "A-D", "M-D" -> "000111"
             "D&A", "D&M" -> "000000"
             "D|A", "D|M" -> "010101"
-            else  -> none
+            else  -> NONE
         }
     }
 }
