@@ -1,6 +1,9 @@
 package instructions
 
-import symbols.BuildInSymbols
+import extensions.toBinaryString
+import symbols.define.BuildInSymbols
+import symbols.define.LabelSymbols
+import symbols.define.VariableSymbols
 
 class InstructionA(
     private val code: String,

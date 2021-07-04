@@ -1,4 +1,4 @@
-package symbols
+package symbols.instruction
 
 class CompSymbols private constructor() {
     companion object {

@@ -1,4 +1,4 @@
-package symbols
+package symbols.instruction
 
 class DestSymbols private constructor() {
     companion object {

@@ -1,9 +1,9 @@
 package instructions
 
-import symbols.AControlBit
-import symbols.CompSymbol
-import symbols.DestSymbol
-import symbols.JumpSymbol
+import symbols.instruction.ABit
+import symbols.instruction.CompSymbols
+import symbols.instruction.DestSymbols
+import symbols.instruction.JumpSymbols
 
 class InstructionC(private val code: String): HackInstruction {
     override fun translate(): String {

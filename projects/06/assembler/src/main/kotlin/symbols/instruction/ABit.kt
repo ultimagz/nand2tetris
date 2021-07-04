@@ -1,4 +1,4 @@
-package symbols
+package symbols.instruction
 
 class AControlBit private constructor() {
     companion object {

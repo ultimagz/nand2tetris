@@ -1,4 +1,4 @@
-package symbols
+package symbols.instruction
 
 class JumpSymbols private constructor() {
     companion object {
