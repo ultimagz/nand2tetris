@@ -1,7 +1,7 @@
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import instructions.HackInstruction
-import symbols.BuildInSymbols
+import symbols.define.LabelSymbols
 import java.io.File
 
 fun main(args: Array<String>) = Assembler().main(args)
