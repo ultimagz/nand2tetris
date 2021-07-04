@@ -7,21 +7,15 @@ class LabelSymbols {
     fun parseLabelSymbols(data: List<String>): List<String> {
         val newData: ArrayList<String> = arrayListOf()
         var lineCount = 0
-        
+
         data.forEach { line ->
-            labelPattern.matchEntire(line)
-                ?.groupValues
-                ?.toMutableList()
-                ?.let {
-                    it.removeFirst()
-                    it.firstOrNull()
-                }
+            getLabelSymbol(line)
                 ?.run {
                     labelSymbols[this] = lineCount
                 } ?: run {
-                    lineCount += 1
-                    newData.add(line)
-                }
+                lineCount += 1
+                newData.add(line)
+            }
         }
 
         return newData
@@ -29,5 +23,12 @@ class LabelSymbols {
 
     fun lookUp(symbol: String): Int? {
         return labelSymbols[symbol]
+    }
+
+    private fun getLabelSymbol(line: String): String? {
+        return labelPattern.matchEntire(line)
+            ?.groupValues
+            ?.toMutableList()
+            ?.getOrNull(1)
     }
 }
