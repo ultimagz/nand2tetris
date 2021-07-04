@@ -1,8 +1,8 @@
 package symbols.instruction
 
-class AControlBit private constructor() {
+class ABit private constructor() {
     companion object {
-        private val INSTANCE = AControlBit()
+        private val INSTANCE = ABit()
 
         fun lookUp(symbol: String): String = INSTANCE.lookUp(symbol)
     }
