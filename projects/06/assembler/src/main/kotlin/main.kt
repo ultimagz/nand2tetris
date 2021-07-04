@@ -19,15 +19,23 @@ class HackAssembler: CliktCommand(help = "Translate FILE Hack assembly to binary
             .let { labelSymbols.parseLabelSymbols(it) }
             .map { HackInstruction.matchWith(it, labelSymbols = labelSymbols).translate() }
 
+            .run { save(this) }
     }
 
     private fun removeComments(line: String): String {
         return line.replace(regex = Regex("//.*"), replacement = "").trim()
     }
 
+    private fun save(data: List<String>) {
+        val outFile = createOutputFile()
+        saveToHackFile(outFile, data)
     }
 
+    private fun createOutputFile(): File {
+        val parentDir = File(file).parent
+        val fileName = File(file).nameWithoutExtension
 
+        return File("$parentDir/$fileName$fileExtension")
     }
 
     private fun saveToHackFile(file: File, data: List<String>) {
@@ -40,19 +48,5 @@ class HackAssembler: CliktCommand(help = "Translate FILE Hack assembly to binary
                 writer.println(it)
             }
         }
-    }
-
-    private fun createOutputFile(customOutPath: String?): File {
-        val outPath = if (customOutPath.isNullOrEmpty()) {
-            val parentDir = File(file).parent
-            val fileName = File(file).nameWithoutExtension
-            val fileExtension = ".hack"
-
-            "$parentDir/$fileName$fileExtension"
-        } else {
-            customOutPath
-        }
-
-        return File(outPath)
     }
 }
