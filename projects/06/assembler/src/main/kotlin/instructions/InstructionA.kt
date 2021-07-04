@@ -7,9 +7,11 @@ import symbols.define.VariableSymbols
 
 class InstructionA(
     private val code: String,
-    private val labelSymbols: HashMap<String, Int> = hashMapOf(),
-    private val variableSymbols: HashMap<String, Int> = hashMapOf()
+    private val labelSymbols: LabelSymbols
 ): HackInstruction {
+
+    private val variableSymbols = VariableSymbols()
+
     override fun translate(): String {
         return InstructionPattern.A.matchEntire(code)
             ?.groupValues
@@ -20,21 +22,13 @@ class InstructionA(
     }
 
     private fun getSymbolValue(symbol: String): String {
-        return symbol.toIntOrNull()?.let { toBinaryString(it) } ?: getValueFromSymbol(symbol)
+        return symbol.toIntOrNull()?.toBinaryString() ?: getValueFromSymbol(symbol)
     }
 
     private fun getValueFromSymbol(symbol: String): String {
-        val value = variableSymbols[symbol]
-            ?: labelSymbols[symbol]
-            ?: BuildInSymbols.getValue(symbol)
-            ?: throw Exception(" Cannot find symbol ($symbol)")
-        return toBinaryString(value)
-    }
-
-    fun toBinaryString(x: Int, len: Int = 16): String {
-        return String.format(
-            "%${len}s",
-            Integer.toBinaryString(x)
-        ).replace(" ".toRegex(), "0")
+        val value = BuildInSymbols.lookUp(symbol)
+            ?: labelSymbols.lookUp(symbol)
+            ?: variableSymbols.lookUp(symbol)
+        return value.toBinaryString()
     }
 }

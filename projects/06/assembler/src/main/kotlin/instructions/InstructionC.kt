@@ -8,47 +8,43 @@ import symbols.instruction.JumpSymbols
 class InstructionC(private val code: String): HackInstruction {
     override fun translate(): String {
         return when {
-            InstructionPattern.C_DEST_COMP.matches(code) -> translateDestComp(code)
-            InstructionPattern.C_COMP_JUMP.matches(code) -> translateCompJump(code)
+            InstructionPattern.C_DEST_COMP.matches(code) -> translate(InstructionPattern.C_DEST_COMP, ::buildDestComp)
+            InstructionPattern.C_COMP_JUMP.matches(code) -> translate(InstructionPattern.C_COMP_JUMP, ::buildCompJump)
             else -> throw Exception("Cannot translate ($code) to Instruction A format.")
         }
     }
 
-    private fun translateDestComp(code: String): String {
-        return InstructionPattern.C_DEST_COMP.matchEntire(code)
+    private fun translate(pattern: InstructionPattern, transform: (Pair<String, String>) -> String): String {
+        return pattern.matchEntire(code)
             ?.groupValues
             ?.toMutableList()
             ?.let {
                 it.removeFirst()
-
-                val destSymbol = it.first()
-                val compSymbol = it.last()
-
-                val dest = DestSymbol.getValue(destSymbol)
-                val a = AControlBit.getValue(compSymbol)
-                val comp = CompSymbol.getValue(compSymbol)
-                val jump = JumpSymbol.none
-
-                "111$a$comp$dest$jump"
-            } ?: throw Exception("Fail to translate ($code) to Instruction C Dest=Comp.")
+                assert(it.size == 2)
+                Pair(it.first(), it.last())
+            }
+            ?.let(transform)
+            ?: throw Exception("Cannot translate ($code) to $pattern.")
     }
 
-    private fun translateCompJump(code: String): String {
-        return InstructionPattern.C_COMP_JUMP.matchEntire(code)
-            ?.groupValues
-            ?.toMutableList()
-            ?.let {
-                it.removeFirst()
+    private fun buildDestComp(symbols: Pair<String, String>): String {
+        val destSymbol = symbols.first
+        val compSymbol = symbols.second
+        return buildMachineCode(destSymbol = destSymbol, compSymbol = compSymbol)
+    }
 
-                val compSymbol = it.first()
-                val jumpSymbol = it.last()
+    private fun buildCompJump(symbols: Pair<String, String>): String {
+        val compSymbol = symbols.first
+        val jumpSymbol = symbols.second
+        return buildMachineCode(compSymbol = compSymbol, jumpSymbol = jumpSymbol)
+    }
 
-                val dest = DestSymbol.none
-                val a = AControlBit.getValue(compSymbol)
-                val comp = CompSymbol.getValue(compSymbol)
-                val jump = JumpSymbol.getValue(jumpSymbol)
+    private fun buildMachineCode(destSymbol: String? = null, compSymbol: String, jumpSymbol: String? = null): String {
+        val dest = if (destSymbol == null) DestSymbols.NONE else DestSymbols.lookUp(destSymbol)
+        val a = ABit.lookUp(compSymbol)
+        val comp = CompSymbols.lookUp(compSymbol)
+        val jump = if (jumpSymbol == null) JumpSymbols.NONE else JumpSymbols.lookUp(jumpSymbol)
 
-                "111$a$comp$dest$jump"
-            } ?: throw Exception("Fail to translate ($code) to Instruction C Comp;Jump.")
+        return "111$a$comp$dest$jump"
     }
 }
