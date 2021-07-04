@@ -2,7 +2,7 @@ package symbols.instruction
 
 class JumpSymbols private constructor() {
     companion object {
-        const val none: String = "000"
+        const val NONE: String = "000"
 
         private val INSTANCE = JumpSymbols()
 
@@ -18,7 +18,7 @@ class JumpSymbols private constructor() {
             "JNE" -> "101"
             "JLE" -> "110"
             "JMP" -> "111"
-            else  -> none
+            else  -> NONE
         }
     }
 }
