@@ -9,76 +9,25 @@ fun main(args: Array<String>) = HackAssembler().main(args)
 class HackAssembler: CliktCommand(help = "Translate FILE Hack assembly to binary.") {
 
     private val file by argument()
-    private val customOutPath: String? = null
-    private val labelSymbols: HashMap<String, Int> = hashMapOf()
-    private val variableSymbols: HashMap<String, Int> = hashMapOf()
+    private val fileExtension = ".hack"
+    private val labelSymbols = LabelSymbols()
 
     override fun run() {
         File(file).readLines()
-            .map { CleanUp(it).removeComments() }
+            .map { removeComments(it) }
             .filter { it.isNotEmpty() }
-            .let { collectLabelSymbols(it) }
-            .let { collectVariableSymbols(it) }
-            .map { echo(it); it }
-            .map { HackInstruction.matchWith(it, labelSymbols = labelSymbols, variableSymbols = variableSymbols).translate() }
-            .toList()
-            .run {
-                debugUserDefineSymbols()
-                val outFile = createOutputFile(customOutPath)
-                saveToHackFile(outFile, this)
-            }
+            .let { labelSymbols.parseLabelSymbols(it) }
+            .map { HackInstruction.matchWith(it, labelSymbols = labelSymbols).translate() }
+
     }
 
-    private fun debugUserDefineSymbols() {
-        echo()
-        echo("labels = $labelSymbols")
-        echo()
-        echo("variables = $variableSymbols")
+    private fun removeComments(line: String): String {
+        return line.replace(regex = Regex("//.*"), replacement = "").trim()
     }
 
-    private fun collectLabelSymbols(data: List<String>): List<String> {
-        val labelPattern = "^(?>\\(([a-zA-Z_.\$:][a-zA-Z0-9_.\$:]*)\\))\$".toRegex()
-        val newData: ArrayList<String> = arrayListOf()
-        var lineCount = 0
-        data.forEach { line ->
-            labelPattern.matchEntire(line)
-                ?.groupValues
-                ?.toMutableList()
-                ?.let {
-                    it.removeFirst()
-
-                    val label = it.first()
-                    labelSymbols[label] = lineCount
-                } ?: run {
-                    lineCount += 1
-                    newData.add(line)
-                }
-        }
-
-        return newData
     }
 
-    private fun collectVariableSymbols(data: List<String>): List<String>  {
-        val variablePattern = "^(?>@([a-zA-Z_.\$:][a-zA-Z0-9_.\$:]*))\$".toRegex()
-        var address = 16
-        data.forEach { line ->
-            variablePattern.matchEntire(line)
-                ?.groupValues
-                ?.toMutableList()
-                ?.let {
-                    it.removeFirst()
-                    it
-                }
-                ?.filter {
-                    variableSymbols[it] == null && labelSymbols[it] == null && !BuildInSymbols.isBuildInSymbol(it)
-                }
-                ?.forEach {
-                    variableSymbols[it] = address
-                    address += 1
-                }
-        }
 
-        return data
     }
 
     private fun saveToHackFile(file: File, data: List<String>) {
